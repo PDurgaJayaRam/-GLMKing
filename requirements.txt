@@ -28,3 +28,4 @@ sqlalchemy
 fastapi
 uvicorn
 python-multipart
+numpy<2
