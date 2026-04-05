@@ -11,6 +11,7 @@ RUN apt-get update && apt-get install -y \
     libxfixes3 libxrandr2 libgbm1 \
     libpango-1.0-0 libcairo2 libasound2 \
     libfreetype6 libfontconfig1 \
+    tesseract-ocr tesseract-ocr-all \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
@@ -19,4 +20,7 @@ RUN playwright install chromium
 RUN crawl4ai-setup
 
 COPY bot.py .
+
+EXPOSE 8080
+
 CMD ["python", "-u", "bot.py"]

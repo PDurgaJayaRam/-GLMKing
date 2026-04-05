@@ -18,3 +18,13 @@ langdetect
 schedule
 forex-python
 python-weather
+RestrictedPython
+reportlab
+fpdf2
+python-docx
+pytesseract
+openai-whisper
+sqlalchemy
+fastapi
+uvicorn
+python-multipart
