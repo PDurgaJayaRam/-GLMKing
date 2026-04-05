@@ -30,7 +30,8 @@ import matplotlib.pyplot as plt
 from PIL import Image, ImageOps
 import pdfplumber
 import wikipedia
-from googletrans import Translator
+from deep_translator import GoogleTranslator
+from langdetect import detect
 from forex_python.converter import CurrencyRates
 import python_weather
 
@@ -86,7 +87,6 @@ logger = logging.getLogger(__name__)
 
 # ─────────────────────────── Globals ─────────────────────────────────
 APP_INSTANCE = None
-translator = Translator()
 c_rates = CurrencyRates(force_decimal=False)
 chroma_client = chromadb.Client()
 memory_collection = chroma_client.get_or_create_collection("user_memories")
@@ -624,19 +624,20 @@ async def cmd_translate(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if len(context.args) < 2: return await update.message.reply_text("Usage: `/translate <language> <text>`")
     lang, text = context.args[0], " ".join(context.args[1:])
     try:
-        res = await asyncio.to_thread(translator.translate, text, dest=lang)
-        await update.message.reply_text(f"Translated to {lang} (Detected {res.src}):\\n{res.text}")
-    except Exception:
-        await update.message.reply_text("Translation failed.")
+        source_lang = await asyncio.to_thread(detect, text)
+        res = await asyncio.to_thread(GoogleTranslator(source='auto', target=lang).translate, text)
+        await update.message.reply_text(f"Translated to {lang} (Detected {source_lang}):\\n{res}")
+    except Exception as e:
+        await update.message.reply_text(f"Translation failed: {e}")
 
 async def cmd_detect(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = " ".join(context.args)
     if not text: return await update.message.reply_text("Usage: `/detect <text>`")
     try:
-        res = await asyncio.to_thread(translator.detect, text)
-        await update.message.reply_text(f"This text is in: {res.lang}")
-    except Exception:
-        await update.message.reply_text("Translation failed.")
+        res = await asyncio.to_thread(detect, text)
+        await update.message.reply_text(f"This text is in: {res}")
+    except Exception as e:
+        await update.message.reply_text(f"Detection failed: {e}")
 
 # --- Currency & Weather ---
 

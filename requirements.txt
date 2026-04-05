@@ -13,7 +13,8 @@ Pillow
 pdfplumber
 openpyxl
 wikipedia
-googletrans==4.0.0rc1
+deep-translator
+langdetect
 schedule
 forex-python
 python-weather
