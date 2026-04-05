@@ -14,9 +14,6 @@ import threading
 from datetime import datetime
 import uuid
 import re
-import smtplib
-from email.message import EmailMessage
-
 import httpx
 from duckduckgo_search import DDGS
 from crawl4ai import AsyncWebCrawler
@@ -73,9 +70,6 @@ if not TELEGRAM_TOKEN:
     raise RuntimeError("TELEGRAM_TOKEN environment variable is not set.")
 if not GLM_API_KEY:
     raise RuntimeError("GLM_API_KEY environment variable is not set.")
-
-EMAIL_ADDRESS = os.environ.get("EMAIL_ADDRESS")
-EMAIL_PASSWORD = os.environ.get("EMAIL_PASSWORD")
 
 GLM_API_URL = "https://open.bigmodel.cn/api/paas/v4/chat/completions"
 
@@ -377,7 +371,6 @@ async def cmd_help(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "FILE GEN: /generate_pdf /generate_excel /generate_doc /report\n"
         "OCR: /ocr /ocr_translate\n"
         "AUDIO: /transcribe /transcribe_translate\n"
-        "EMAIL: /send_email /email_report\n"
         "DB: /query /db_stats\n"
         "API: /api /google_sheet /webhook_url\n"
     )
@@ -505,26 +498,6 @@ async def cmd_transcribe(update: Update, context: ContextTypes.DEFAULT_TYPE):
     os.remove(path)
     await process_ai_request(update, context, f"Summarize this audio:\n{txt}")
 
-# --- Email ---
-async def cmd_send_email(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    args = " ".join(context.args).split('|')
-    if len(args)<3: return await update.message.reply_text("Usage `/send_email to | subject | body`")
-    try:
-        msg = EmailMessage()
-        msg.set_content(args[2])
-        msg['Subject'] = args[1]
-        msg['From'] = EMAIL_ADDRESS
-        msg['To'] = args[0]
-        def send():
-            with smtplib.SMTP("smtp.gmail.com", 587) as server:
-                server.starttls()
-                server.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
-                server.send_message(msg)
-        await asyncio.to_thread(send)
-        await update.message.reply_text("Email sent!")
-    except Exception as e:
-        await update.message.reply_text(f"Fail: {e}")
-
 # --- API ---
 async def cmd_api(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
@@ -586,7 +559,6 @@ def main():
     app.add_handler(CommandHandler("generate_doc", cmd_generate_doc))
     app.add_handler(CommandHandler("ocr", cmd_ocr))
     app.add_handler(CommandHandler("transcribe", cmd_transcribe))
-    app.add_handler(CommandHandler("send_email", cmd_send_email))
     app.add_handler(CommandHandler("api", cmd_api))
     app.add_handler(CommandHandler("webhook_url", cmd_webhook_url))
     app.add_handler(CommandHandler("query", cmd_query))
