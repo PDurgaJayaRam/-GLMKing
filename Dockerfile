@@ -2,7 +2,7 @@ FROM python:3.11-slim
 WORKDIR /app
 
 RUN apt-get update && apt-get install -y \
-    wget curl ffmpeg \
+    wget curl ffmpeg build-essential gcc g++ python3-dev \
     libglib2.0-0 libnss3 libnspr4 \
     libatk1.0-0 libatk-bridge2.0-0 \
     libcups2 libdrm2 libdbus-1-3 \
@@ -14,7 +14,7 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --upgrade pip setuptools wheel && pip install --no-cache-dir -r requirements.txt
 RUN playwright install chromium
 RUN crawl4ai-setup
 
